@@ -7,17 +7,18 @@ close all;
 
 showPlot='on';
 
-startTime=datetime(2015,7,3,22,2,0);
-endTime=datetime(2015,7,3,22,7,0);
+startTime=datetime(2015,7,4,0,5,30);
+endTime=datetime(2015,7,4,0,8,30);
 
-meltAlt=4; % Estimated altitude of melting layer in km
+meltAlt=3.5; % Estimated altitude of melting layer in km
+divAlt=6; % Estimated altitude of divergence level in km
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %addpath(genpath('~/git/HCR_configuration/projDir/qc/dataProcessing/'));
 
 dataDir='/scr/snow2/rsfdata/projects/cset/cloudSat/hdf/';
-infile='2015184212428_48841_CS_2B-GEOPROF_GRANULE_P1_R05_E06_F00.hdf';
+infile='2015184230321_48842_CS_2B-GEOPROF_GRANULE_P1_R05_E06_F00.hdf';
 
 figdir=['/scr/sci/romatsch/other/convStratCloudSat/'];
 
@@ -35,8 +36,8 @@ yearStart=datetime(str2num(yearIn),1,1);
 timeStart=yearStart+days(str2num(dayIn)-1)+hours(str2num(hourIn))+minutes(str2num(minIn))+seconds(str2num(secIn));
 
 timeAll=timeStart+seconds(timeIn{:});
-firstInd=find(timeAll==startTime);
-lastInd=find(timeAll==endTime);
+[min1,firstInd]=min(abs(timeAll-startTime));
+[min2,lastInd]=min(abs(timeAll-endTime));
 
 longitude=hdfread([dataDir,infile],'Longitude');
 longitude=longitude{:};
@@ -60,7 +61,7 @@ data.longitude=longitude(firstInd:lastInd);
 data.latitude=latitude(firstInd:lastInd);
 data.DBZ=double(DBZ(firstInd:lastInd,:))';
 data.FLAG=FLAG(firstInd:lastInd,:)';
-data.TOPO=TOPO(firstInd:lastInd);
+data.TOPO=double(TOPO(firstInd:lastInd));
 
 %% Prepare data
 
@@ -77,6 +78,11 @@ data.asl=flipud(data.asl');
 data.MELTING_LAYER=nan(size(data.DBZ));
 data.MELTING_LAYER(data.asl>=meltAlt.*1000)=20;
 data.MELTING_LAYER(data.asl<meltAlt.*1000)=10;
+
+% Create fake temperature profile
+data.TEMP=nan(size(data.DBZ));
+data.TEMP(data.asl>=divAlt.*1000)=-30;
+data.TEMP(data.asl<divAlt.*1000)=10;
 
 ylimUpper=(max(data.asl(~isnan(data.DBZ)))./1000)+0.5;
 
@@ -106,43 +112,43 @@ classBasic=f_classBasic(convDBZ,stratMixed,mixedConv,data.MELTING_LAYER);
 
 %% Sub classification
 
-% disp('Sub classification ...');
-% 
-% classSub=f_classSubBoth(classBasic,data.asl,data.TOPO,data.MELTING_LAYER,data.TEMP,data.elevation,data.FLAG);
+disp('Sub classification ...');
+
+classSub=f_classSub(classBasic,data.asl,data.TOPO,data.MELTING_LAYER,data.TEMP);
 
 %% Plot strat conv
 
 disp('Plotting conv/strat ...');
 
 close all
-% 
-% classSubPlot=classSub;
-% classSubPlot(classSub==14)=1;
-% classSubPlot(classSub==16)=2;
-% classSubPlot(classSub==18)=3;
-% classSubPlot(classSub==25)=4;
-% classSubPlot(classSub==30)=5;
-% classSubPlot(classSub==32)=6;
-% classSubPlot(classSub==34)=7;
-% classSubPlot(classSub==36)=8;
-% classSubPlot(classSub==38)=9;
-% 
-% % 1D
-% stratConv1D=max(classSubPlot,[],1);
-% time1D=data.time(~isnan(stratConv1D));
-% stratConv1D=stratConv1D(~isnan(stratConv1D));
-% 
-% colmapSC=[0,0.1,0.6;
-%     0.38,0.42,0.96;
-%     0.65,0.74,0.86;
-%     0.32,0.78,0.59;
-%     1,0,0;
-%     1,0,1;
-%     1,1,0;
-%     0.99,0.77,0.22;
-%     0.7,0,0];
-% 
-% col1D=colmapSC(stratConv1D,:);
+
+classSubPlot=classSub;
+classSubPlot(classSub==14)=1;
+classSubPlot(classSub==16)=2;
+classSubPlot(classSub==18)=3;
+classSubPlot(classSub==25)=4;
+classSubPlot(classSub==30)=5;
+classSubPlot(classSub==32)=6;
+classSubPlot(classSub==34)=7;
+classSubPlot(classSub==36)=8;
+classSubPlot(classSub==38)=9;
+
+% 1D
+stratConv1D=max(classSubPlot,[],1);
+time1D=data.time(~isnan(stratConv1D));
+stratConv1D=stratConv1D(~isnan(stratConv1D));
+
+colmapSC=[0,0.1,0.6;
+    0.38,0.42,0.96;
+    0.65,0.74,0.86;
+    0.32,0.78,0.59;
+    1,0,0;
+    1,0,1;
+    1,1,0;
+    0.99,0.77,0.22;
+    0.7,0,0];
+
+col1D=colmapSC(stratConv1D,:);
 
 close all
 
@@ -193,43 +199,44 @@ cb.Ticks=[1,2,3];
 cb.TickLabels=cat(2,{'Stratiform','Mixed','Convective'});
 ylim([0 ylimUpper]);
 xlim([data.time(1),data.time(end)]);
+title('Basic stratiform/convective partitioning')
 grid on
 s5pos=s3.Position;
 s3.Position=[s5pos(1),s5pos(2),s1pos(3),s5pos(4)];
 
-% s5=subplot(30,1,30);
-% 
-% hold on
-% scat1=scatter(time1D,ones(size(time1D)),10,col1D,'filled');
-% set(gca,'clim',[0,1]);
-% set(gca,'YTickLabel',[]);
-% s5.Colormap=colmapSC;
-% xlim([data.time(1),data.time(end)]);
-% s6pos=s5.Position;
-% s5.Position=[s6pos(1),s6pos(2)-0.023,s1pos(3),s6pos(4)];
-% 
-% s4=subplot(4,1,4);
-% 
-% hold on
-% surf(data.time,data.asl./1000,classSubPlot,'edgecolor','none');
-% view(2);
-% ylabel('Altitude (km)');
-% caxis([0 10]);
-% ylim([0 ylimUpper]);
-% xlim([data.time(1),data.time(end)]);
-% s4.Colormap=colmapSC;
-% caxis([0.5 9.5]);
-% cb=colorbar;
-% cb.Ticks=1:9;
-% cb.TickLabels={'Strat Low','Strat Mid','Strat High','Mixed',...
-%     'Conv','Conv Elev','Conv Shallow','Conv Mid','Conv Deep'};
-% set(gca,'XTickLabel',[]);
-% grid on
-% title('Stratiform/convective partitioning')
-% s5pos=s4.Position;
-% s4.Position=[s5pos(1),s5pos(2),s1pos(3),s5pos(4)];
-% 
-% linkaxes([s1 s2 s3 s4],'xy');
+s5=subplot(30,1,30);
+
+hold on
+scat1=scatter(time1D,ones(size(time1D)),10,col1D,'filled');
+set(gca,'clim',[0,1]);
+set(gca,'YTickLabel',[]);
+s5.Colormap=colmapSC;
+xlim([data.time(1),data.time(end)]);
+s6pos=s5.Position;
+s5.Position=[s6pos(1),s6pos(2)-0.023,s1pos(3),s6pos(4)];
+
+s4=subplot(4,1,4);
+
+hold on
+surf(data.time,data.asl./1000,classSubPlot,'edgecolor','none');
+view(2);
+ylabel('Altitude (km)');
+caxis([0 10]);
+ylim([0 ylimUpper]);
+xlim([data.time(1),data.time(end)]);
+s4.Colormap=colmapSC;
+caxis([0.5 9.5]);
+cb=colorbar;
+cb.Ticks=1:9;
+cb.TickLabels={'Strat Low','Strat Mid','Strat High','Mixed',...
+    'Conv','Conv Elev','Conv Shallow','Conv Mid','Conv Deep'};
+set(gca,'XTickLabel',[]);
+grid on
+title('Stratiform/convective partitioning')
+s5pos=s4.Position;
+s4.Position=[s5pos(1),s5pos(2),s1pos(3),s5pos(4)];
+
+linkaxes([s1 s2 s3 s4],'xy');
 
 set(gcf,'PaperPositionMode','auto')
 print(f1,[figdir,'convStrat_',datestr(data.time(1),'yyyymmdd_HHMMSS'),'_to_',datestr(data.time(end),'yyyymmdd_HHMMSS')],'-dpng','-r0')
