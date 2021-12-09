@@ -53,7 +53,7 @@ FLAG=hdfread([dataDir,infile],'CPR_Cloud_mask');
 FLAG(FLAG==-9)=nan;
 TOPO=hdfread([dataDir,infile],'DEM_elevation');
 TOPO=TOPO{:};
-TOPO(TOPO==9999)=0;
+TOPO(TOPO==-9999)=0;
 
 %% Get right times
 data.time=timeAll(firstInd:lastInd);
@@ -167,6 +167,7 @@ ylim([0 ylimUpper]);
 xlim([data.time(1),data.time(end)]);
 colorbar
 grid on
+box on
 title('Reflectivity (dBZ)')
 s1pos=s1.Position;
 s1.Position=[s1pos(1),s1pos(2),s1pos(3),s1pos(4)];
@@ -182,9 +183,10 @@ ylim([0 ylimUpper]);
 xlim([data.time(1),data.time(end)]);
 colorbar
 grid on
+box on
 title('Convectivity')
-s3pos=s2.Position;
-s2.Position=[s3pos(1),s3pos(2),s1pos(3),s3pos(4)];
+s2pos=s2.Position;
+s2.Position=[s2pos(1),s2pos(2),s1pos(3),s2pos(4)];
 
 s3=subplot(4,1,3);
 
@@ -201,8 +203,9 @@ ylim([0 ylimUpper]);
 xlim([data.time(1),data.time(end)]);
 title('Basic stratiform/convective partitioning')
 grid on
-s5pos=s3.Position;
-s3.Position=[s5pos(1),s5pos(2),s1pos(3),s5pos(4)];
+box on
+s3pos=s3.Position;
+s3.Position=[s3pos(1),s3pos(2),s1pos(3),s3pos(4)];
 
 s5=subplot(30,1,30);
 
@@ -212,8 +215,10 @@ set(gca,'clim',[0,1]);
 set(gca,'YTickLabel',[]);
 s5.Colormap=colmapSC;
 xlim([data.time(1),data.time(end)]);
-s6pos=s5.Position;
-s5.Position=[s6pos(1),s6pos(2)-0.023,s1pos(3),s6pos(4)];
+grid on
+box on
+s5pos=s5.Position;
+s5.Position=[s5pos(1),s5pos(2)-0.023,s1pos(3),s5pos(4)];
 
 s4=subplot(4,1,4);
 
@@ -232,9 +237,10 @@ cb.TickLabels={'Strat Low','Strat Mid','Strat High','Mixed',...
     'Conv','Conv Elev','Conv Shallow','Conv Mid','Conv Deep'};
 set(gca,'XTickLabel',[]);
 grid on
+box on
 title('Stratiform/convective partitioning')
-s5pos=s4.Position;
-s4.Position=[s5pos(1),s5pos(2),s1pos(3),s5pos(4)];
+s4pos=s4.Position;
+s4.Position=[s4pos(1),s4pos(2),s1pos(3),s4pos(4)];
 
 linkaxes([s1 s2 s3 s4],'xy');
 

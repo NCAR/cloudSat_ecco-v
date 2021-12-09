@@ -29,23 +29,28 @@ for ii=1:convAreas.NumObjects
 
     % Check if near surface
     aslArea=distAslTopo(convAreas.PixelIdxList{ii});
-    nearSurfPix=sum(aslArea<500);
-    % Shallow, mid, or deep
-    meltMax=max(melt(convAreas.PixelIdxList{ii}));
-    if meltMax<20 % Below melting layer: shallow
-        % Near plane check
-        if planePix>10
-            classSub(convAreas.PixelIdxList{ii})=30;
-        else
-            classSub(convAreas.PixelIdxList{ii})=34;
-        end
+    nearSurfPix=sum(aslArea<1500);
+    if nearSurfPix==0 % Not near surface: elevated
+        classSub(convAreas.PixelIdxList{ii})=32;
     else
-        minTemp=min(temp(convAreas.PixelIdxList{ii}));
-        if minTemp>=-25 % Below divergence level: mid
-            classSub(convAreas.PixelIdxList{ii})=36;
-        else % Deep
-            classSub(convAreas.PixelIdxList{ii})=38;
 
+        % Shallow, mid, or deep
+        meltMax=max(melt(convAreas.PixelIdxList{ii}));
+        if meltMax<20 % Below melting layer: shallow
+            % Near plane check
+            if planePix>10
+                classSub(convAreas.PixelIdxList{ii})=30;
+            else
+                classSub(convAreas.PixelIdxList{ii})=34;
+            end
+        else
+            minTemp=min(temp(convAreas.PixelIdxList{ii}));
+            if minTemp>=-25 % Below divergence level: mid
+                classSub(convAreas.PixelIdxList{ii})=36;
+            else % Deep
+                classSub(convAreas.PixelIdxList{ii})=38;
+
+            end
         end
     end
 end
