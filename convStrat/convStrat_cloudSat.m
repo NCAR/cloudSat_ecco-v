@@ -232,7 +232,7 @@ cb4.TickLabels={'Strat Low','Strat Mid','Strat High','Mixed',...
 set(gca,'XTickLabel',[]);
 grid on
 box on
-text(textDate,textAlt,'(c) Convective/stratiform classification','FontSize',11,'FontWeight','bold');
+text(textDate,textAlt,'(c) Echo type','FontSize',11,'FontWeight','bold');
 
 s1.Position=[0.049 0.7 0.82 0.29];
 s2.Position=[0.049 0.4 0.82 0.29];
