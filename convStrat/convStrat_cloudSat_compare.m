@@ -8,7 +8,7 @@ close all;
 showPlot='on';
 
 startTime=datetime(2015,7,4,0,5,30);
-endTime=datetime(2015,7,4,0,8,30);
+endTime=datetime(2015,7,4,0,8,0);
 
 meltAlt=3.5; % Estimated altitude of melting layer in km
 divAlt=6; % Estimated altitude of divergence level in km
@@ -19,6 +19,9 @@ divAlt=6; % Estimated altitude of divergence level in km
 
 dataDir='/scr/snow2/rsfdata/projects/cset/cloudSat/GEOPROF/hdf/';
 infile='2015184230321_48842_CS_2B-GEOPROF_GRANULE_P1_R05_E06_F00.hdf';
+
+dataDir2='/scr/snow2/rsfdata/projects/cset/cloudSat/PRECIP-COLUMN/hdf/';
+infile2='2015184230321_48842_CS_2C-PRECIP-COLUMN_GRANULE_P1_R05_E06_F00.hdf';
 
 figdir=['/scr/sci/romatsch/other/convStratPaperHCR/'];
 
@@ -54,6 +57,12 @@ FLAG(FLAG==-9)=nan;
 TOPO=hdfread([dataDir,infile],'DEM_elevation');
 TOPO=TOPO{:};
 TOPO(TOPO==-9999)=0;
+
+%% Read conv_strat flag
+
+csFlag=hdfread([dataDir2,infile2],'Conv_strat_flag');
+csFlag=double(csFlag{:});
+csFlag=csFlag(firstInd:lastInd);
 
 %% Get right times
 data.time=timeAll(firstInd:lastInd);
@@ -116,11 +125,7 @@ disp('Sub classification ...');
 
 classSub=f_classSub(classBasic,data.asl,data.TOPO,data.MELTING_LAYER,data.TEMP);
 
-%% Plot strat conv
-
-disp('Plotting conv/strat ...');
-
-close all
+%% Prepare for plotting
 
 classSubPlot=classSub;
 classSubPlot(classSub==14)=1;
@@ -133,7 +138,7 @@ classSubPlot(classSub==34)=7;
 classSubPlot(classSub==36)=8;
 classSubPlot(classSub==38)=9;
 
-% 1D
+% 1D ecco
 stratConv1D=max(classSubPlot,[],1);
 time1D=data.time(~isnan(stratConv1D));
 stratConv1D=stratConv1D(~isnan(stratConv1D));
@@ -150,15 +155,29 @@ colmapSC=[0,0.1,0.6;
 
 col1D=colmapSC(stratConv1D,:);
 
-close all
+% 1D cloudsat
+csFlag(csFlag<1)=nan;
 
+time1DcloudSat=data.time(~isnan(csFlag));
+cloudSatFlag1D=csFlag(~isnan(csFlag));
+
+colmapCloudSat=[1,0,0;
+    0,0,1;
+    1,1,0];
+
+col1DcloudSat=colmapCloudSat(cloudSatFlag1D,:);
+
+% Text
 textAlt=11.3;
 textDate=datetime(2015,7,4,0,5,32);
+
+%% Plot
+disp('Plotting conv/strat ...');
 
 close all
 
 wi=9;
-hi=6;
+hi=7;
 
 fig1=figure('DefaultAxesFontSize',11,'DefaultFigurePaperType','<custom>','units','inch','position',[3,100,wi,hi]);
 fig1.PaperPositionMode = 'manual';
@@ -203,16 +222,32 @@ grid on
 box on
 text(textDate,textAlt,'(b) Convectivity','FontSize',11,'FontWeight','bold');
 
-s5=subplot(30,1,30);
+s5=subplot(30,1,28);
 
 hold on
 scat1=scatter(time1D,ones(size(time1D)),10,col1D,'filled');
 set(gca,'clim',[0,1]);
 set(gca,'YTickLabel',[]);
+set(gca,'XTickLabel',[]);
 s5.Colormap=colmapSC;
 xlim([data.time(1),data.time(end)]);
 grid on
 box on
+
+s6=subplot(30,1,30);
+
+hold on
+scat1=scatter(time1DcloudSat,ones(size(time1DcloudSat)),10,col1DcloudSat,'filled');
+set(gca,'clim',[0,4]);
+set(gca,'YTickLabel',[]);
+s6.Colormap=colmapCloudSat;
+xlim([data.time(1),data.time(end)]);
+grid on
+box on
+text(datetime(2015,7,4,0,8,31),3,'Convective','edgecolor','r','Margin',0.1)
+text(datetime(2015,7,4,0,8,31),0,'Stratiform','edgecolor','b','Margin',0.1)
+text(datetime(2015,7,4,0,8,31),-3,'Shallow','edgecolor','y','Margin',0.1)
+text(textDate,3.5,'(d) Echo type CloudSat','FontSize',11,'FontWeight','bold');
 
 s4=subplot(4,1,3);
 
@@ -234,14 +269,15 @@ grid on
 box on
 text(textDate,textAlt,'(c) Echo type','FontSize',11,'FontWeight','bold');
 
-s1.Position=[0.049 0.7 0.82 0.29];
-s2.Position=[0.049 0.4 0.82 0.29];
-s4.Position=[0.049 0.1 0.82 0.29];
-s5.Position=[0.049 0.065 0.82 0.02];
+s1.Position=[0.049 0.715 0.82 0.27];
+s2.Position=[0.049 0.432 0.82 0.27];
+s4.Position=[0.049 0.15 0.82 0.27];
+s5.Position=[0.049 0.12 0.82 0.02];
+s6.Position=[0.049 0.057 0.82 0.02];
 
-cb1.Position=[0.875,0.7,0.02,0.29];
-cb2.Position=[0.875,0.4,0.02,0.29];
-cb4.Position=[0.875,0.1,0.02,0.29];
+cb1.Position=[0.875,0.715,0.02,0.27];
+cb2.Position=[0.875,0.432,0.02,0.27];
+cb4.Position=[0.875,0.15,0.02,0.27];
 
 set(gcf,'PaperPositionMode','auto')
-print(fig1,[figdir,'cloudSat.png'],'-dpng','-r0')
+print(fig1,[figdir,'cloudSatCompare.png'],'-dpng','-r0')
