@@ -1,4 +1,4 @@
-ECCO-V algorithm for application on CloudSat Cloud Profiling Radar (CPR).
+ECCO-V algorithm for application on CloudSat Cloud Profiling Radar (CPR) data.
 
 The details of the algorithm are described in
 
