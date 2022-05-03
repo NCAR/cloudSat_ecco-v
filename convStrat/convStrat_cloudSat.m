@@ -13,10 +13,6 @@ endTime=datetime(2015,7,4,0,8,30);
 meltAlt=3.5; % Estimated altitude of melting layer in km
 divAlt=6; % Estimated altitude of divergence level in km
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%addpath(genpath('~/git/HCR_configuration/projDir/qc/dataProcessing/'));
-
 dataDir='/scr/snow2/rsfdata/projects/cset/cloudSat/GEOPROF/hdf/';
 infile='2015184230321_48842_CS_2B-GEOPROF_GRANULE_P1_R05_E06_F00.hdf';
 
@@ -90,7 +86,7 @@ ylimUpper=(max(data.asl(~isnan(data.DBZ)))./1000)+0.5;
 
 disp('Calculating reflectivity texture ...');
 
-pixRadDBZ=10; % Radius over which texture is calculated in pixels. Default is 50.
+pixRadDBZ=3; % Radius over which texture is calculated in pixels. Default is 50.
 dbzBase=-10; % Reflectivity base value which is subtracted from DBZ.
 
 dbzText=f_reflTexture(data.DBZ,pixRadDBZ,dbzBase);
@@ -98,7 +94,7 @@ dbzText=f_reflTexture(data.DBZ,pixRadDBZ,dbzBase);
 %% Convectivity
 
 % Convectivity
-upperLimDBZ=25;
+upperLimDBZ=20;
 convDBZ=1/upperLimDBZ.*dbzText;
 
 %% Basic classification

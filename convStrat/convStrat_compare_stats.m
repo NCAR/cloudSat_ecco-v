@@ -12,17 +12,8 @@ endTime=datetime(2015,7,4,0,8,0);
 
 plotCases=0;
 
-%meltAlt=3.5; % Estimated altitude of melting layer in km
-%divAlt=6; % Estimated altitude of divergence level in km
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%addpath(genpath('~/git/HCR_configuration/projDir/qc/dataProcessing/'));
-
 dataDir='/scr/snow2/rsfdata/projects/cset/cloudSat/GEOPROF/hdf/';
 dataDir2='/scr/snow2/rsfdata/projects/cset/cloudSat/PRECIP-COLUMN/hdf/';
-
-infile2='2015184230321_48842_CS_2C-PRECIP-COLUMN_GRANULE_P1_R05_E06_F00.hdf';
 
 figdir=['/scr/sci/romatsch/other/convStratPaperHCR/'];
 
@@ -92,7 +83,7 @@ for ii=1:length(allFiles)
     meltAlt=double(meltAlt{:});
     meltAlt(meltAlt<0)=nan;
 
-    divAlt=meltAlt+3;
+    divAlt=meltAlt+4;
     %% Prepare data
 
     % Flag non-cloud echo
@@ -130,15 +121,15 @@ for ii=1:length(allFiles)
 
     disp('Calculating reflectivity texture ...');
 
-    pixRadDBZ=3; % Radius over which texture is calculated in pixels. Default is 10.
-    dbzBase=-10; % Reflectivity base value which is subtracted from DBZ. Default is -10
+    pixRadDBZ=3; % Radius over which texture is calculated in pixels. Default is 3.
+    dbzBase=-10; % Reflectivity base value which is subtracted from DBZ. Default is -10.
 
     dbzText=f_reflTexture(data.DBZ,pixRadDBZ,dbzBase);
 
     %% Convectivity
 
     % Convectivity
-    upperLimDBZ=20;%25
+    upperLimDBZ=20;
     convDBZ=1/upperLimDBZ.*dbzText;
 
     %% Basic classification
@@ -303,17 +294,7 @@ for ii=1:length(allFiles)
                 s5.Position=[s5pos(1),s5pos(2),s1pos(3),s5pos(4)];
                 s6pos=s6.Position;
                 s6.Position=[s6pos(1),s6pos(2),s1pos(3),s6pos(4)];
-               
-%                 s1.Position=[0.049 0.715 0.82 0.27];
-%                 s2.Position=[0.049 0.432 0.82 0.27];
-%                 s4.Position=[0.049 0.15 0.82 0.27];
-%                 s5.Position=[0.049 0.12 0.82 0.02];
-%                 s6.Position=[0.049 0.057 0.82 0.02];
-% 
-%                 cb1.Position=[0.875,0.715,0.02,0.27];
-%                 cb2.Position=[0.875,0.432,0.02,0.27];
-%                 cb4.Position=[0.875,0.15,0.02,0.27];
-                 stop=1;
+             
             end
         end
     end

@@ -24,7 +24,7 @@ distAslTopo=asl-topo;
 for ii=1:convAreas.NumObjects
     % Check if near surface
     aslArea=distAslTopo(convAreas.PixelIdxList{ii});
-    nearSurfPix=sum(aslArea<1500); %1500
+    nearSurfPix=sum(aslArea<1500);
     if nearSurfPix==0 % Not near surface: elevated
         classSub(convAreas.PixelIdxList{ii})=32;
     else

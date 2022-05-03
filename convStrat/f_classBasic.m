@@ -13,7 +13,7 @@ if max(max(maskMixedOrig))==0;
 end
 
 % Remove areas that are small
-maskMixed=bwareaopen(maskMixedOrig,1); % Default is 30.
+maskMixed=bwareaopen(maskMixedOrig,1); % Default is 1.
 
 % Remove data from within too small areas so the convective mask won't pick
 % them up
@@ -36,8 +36,7 @@ for ii=1:mixedAreas.NumObjects
         convCols=conv(:,ucols);
         meltCols=melt(:,ucols);
         thisCols=thisMat(:,ucols);
-        % We turn them upside down because that is what the original code
-        % does
+        % We turn them upside down
         convCols=flipud(convCols);
         meltCols=flipud(meltCols);
         thisCols=flipud(thisCols);
@@ -67,7 +66,7 @@ for ii=1:mixedAreas.NumObjects
 
         medThick=median(sum(~isnan(checkCols),1)); % Median thickness of above melting layer area
 
-        if stratPerc>0.8 & medThick>5 %stratPerc>0.8 & medThick>20
+        if stratPerc>0.8 & medThick>5
             maskMixed(pixInds)=0;
             conv(pixInds)=0;
         end
@@ -75,11 +74,11 @@ for ii=1:mixedAreas.NumObjects
 end
 
 % Set up check
-horLarge=imdilate(maskMixed, strel('line', 50,0));%100
+horLarge=imdilate(maskMixed, strel('line', 50,0));
 
 % Enlarge mixedConv
-mixedLarge1=imdilate(maskMixed, strel('disk', 3)); %5
-mixedLarge=imclose(mixedLarge1,strel('disk', 9)); %30
+mixedLarge1=imdilate(maskMixed, strel('disk', 3));
+mixedLarge=imclose(mixedLarge1,strel('disk', 9));
 mixedLarge(isnan(conv))=0;
 mixedLarge=imfill(mixedLarge,'holes');
 mixedLarge=imerode(mixedLarge,strel('disk', 3));
@@ -106,15 +105,12 @@ mixedLarge=imdilate(mixedLarge,strel('disk', 3));
 % Make conv mask
 maskConv=conv>=mixedConv;
 
-% Remove areas that are small
-%maskConv=bwareaopen(maskConv,100);
-
 % Set up check
-horLarge2=imdilate(maskConv, strel('line', 50,0));%100
+horLarge2=imdilate(maskConv, strel('line', 50,0));
 
 % Enlarge conv
-convLarge1=imdilate(maskConv, strel('disk', 3)); %15
-convLarge=imclose(convLarge1,strel('disk', 5));%50
+convLarge1=imdilate(maskConv, strel('disk', 3));
+convLarge=imclose(convLarge1,strel('disk', 5));
 convLarge(isnan(conv))=0;
 convLarge=imfill(convLarge,'holes');
 convLarge=imerode(convLarge,strel('disk', 3));

@@ -5,24 +5,11 @@ close all;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Input variables %%%%%%%%%%%%%%%%%%%%%%%%%%
 
-showPlot='on';
-
-% startTime=datetime(2015,7,4,0,5,30);
-% endTime=datetime(2015,7,4,0,8,30);
-
-% startTime=datetime(2015,7,3,7,10,40);
-% endTime=datetime(2015,7,3,7,12,10);
-% textAlt=10;
-% textDate=datetime(2015,7,3,7,10,42);
-
 startTime=datetime(2015,7,4,3,6,45);
 endTime=datetime(2015,7,4,3,8,32);
 textAlt=16.5;
 textDate=datetime(2015,7,4,3,6,47);
 textDate2=datetime(2015,7,4,3,8,37);
-
-% startTime=datetime(2015,7,4,8,7,55);
-% endTime=datetime(2015,7,4,8,8,55);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Find infile
@@ -129,7 +116,7 @@ ylimUpper=(max(data.asl(~isnan(data.DBZ)))./1000)+1.5;
 
 disp('Calculating reflectivity texture ...');
 
-pixRadDBZ=10; % Radius over which texture is calculated in pixels. Default is 50.
+pixRadDBZ=3; % Radius over which texture is calculated in pixels. Default is 50.
 dbzBase=-10; % Reflectivity base value which is subtracted from DBZ.
 
 dbzText=f_reflTexture(data.DBZ,pixRadDBZ,dbzBase);
@@ -137,7 +124,7 @@ dbzText=f_reflTexture(data.DBZ,pixRadDBZ,dbzBase);
 %% Convectivity
 
 % Convectivity
-upperLimDBZ=25;
+upperLimDBZ=20;
 convDBZ=1/upperLimDBZ.*dbzText;
 
 %% Basic classification
