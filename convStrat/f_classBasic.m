@@ -13,7 +13,7 @@ if max(max(maskMixedOrig))==0;
 end
 
 % Remove areas that are small
-maskMixed=bwareaopen(maskMixedOrig,30);
+maskMixed=bwareaopen(maskMixedOrig,1); % Default is 30.
 
 % Remove data from within too small areas so the convective mask won't pick
 % them up
@@ -67,7 +67,7 @@ for ii=1:mixedAreas.NumObjects
 
         medThick=median(sum(~isnan(checkCols),1)); % Median thickness of above melting layer area
 
-        if stratPerc>0.8 & medThick>20
+        if stratPerc>0.8 & medThick>5 %stratPerc>0.8 & medThick>20
             maskMixed(pixInds)=0;
             conv(pixInds)=0;
         end
@@ -78,8 +78,8 @@ end
 horLarge=imdilate(maskMixed, strel('line', 50,0));%100
 
 % Enlarge mixedConv
-mixedLarge1=imdilate(maskMixed, strel('disk', 10)); %25
-mixedLarge=imclose(mixedLarge1,strel('disk', 30)); %50
+mixedLarge1=imdilate(maskMixed, strel('disk', 3)); %5
+mixedLarge=imclose(mixedLarge1,strel('disk', 9)); %30
 mixedLarge(isnan(conv))=0;
 mixedLarge=imfill(mixedLarge,'holes');
 mixedLarge=imerode(mixedLarge,strel('disk', 3));
@@ -113,8 +113,8 @@ maskConv=conv>=mixedConv;
 horLarge2=imdilate(maskConv, strel('line', 50,0));%100
 
 % Enlarge conv
-convLarge1=imdilate(maskConv, strel('disk', 7)); %15
-convLarge=imclose(convLarge1,strel('disk', 10));%50
+convLarge1=imdilate(maskConv, strel('disk', 3)); %15
+convLarge=imclose(convLarge1,strel('disk', 5));%50
 convLarge(isnan(conv))=0;
 convLarge=imfill(convLarge,'holes');
 convLarge=imerode(convLarge,strel('disk', 3));

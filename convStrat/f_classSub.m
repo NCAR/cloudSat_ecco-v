@@ -22,27 +22,16 @@ convAreas=bwconncomp(convMask);
 distAslTopo=asl-topo;
 
 for ii=1:convAreas.NumObjects
-    % Check if next to aircraft
-
-    [row1 col1]=ind2sub(size(classIn),convAreas.PixelIdxList{ii});
-    planePix=sum(row1==18); % Number of next to plane pixels
-
     % Check if near surface
     aslArea=distAslTopo(convAreas.PixelIdxList{ii});
-    nearSurfPix=sum(aslArea<1500);
+    nearSurfPix=sum(aslArea<1500); %1500
     if nearSurfPix==0 % Not near surface: elevated
         classSub(convAreas.PixelIdxList{ii})=32;
     else
-
         % Shallow, mid, or deep
         meltMax=max(melt(convAreas.PixelIdxList{ii}));
         if meltMax<20 % Below melting layer: shallow
-            % Near plane check
-            if planePix>10
-                classSub(convAreas.PixelIdxList{ii})=30;
-            else
-                classSub(convAreas.PixelIdxList{ii})=34;
-            end
+            classSub(convAreas.PixelIdxList{ii})=34;
         else
             minTemp=min(temp(convAreas.PixelIdxList{ii}));
             if minTemp>=-25 % Below divergence level: mid
